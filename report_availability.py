@@ -6,7 +6,6 @@ from config import *
 # =========================
 # ZABBIX API
 # =========================
-
 def zabbix_api(method, params, auth=None):
     payload = {
         "jsonrpc": "2.0",
@@ -27,13 +26,6 @@ def zabbix_api(method, params, auth=None):
 def zabbix_login():
     return ZABBIX_TOKEN
 
-# AUTENTICAÇÃO VIA LOGIN USUÁRIO
-#def zabbix_login():
-    return zabbix_api("user.login", {
-        "username": ZABBIX_USER,
-        "password": ZABBIX_PASS
-    })
-
 # =========================
 # PERÍODO MÊS ANTERIOR
 # =========================
@@ -45,7 +37,7 @@ def get_custom_period():
     return int(start.timestamp()), int(end.timestamp()), start, end
 
 # ================================
-# BUSCA POR GRUPOS DE HOSTS E HORS
+# BUSCA POR GRUPOS DE HOSTS E HOSTS
 # ================================
 def get_hosts_by_groups(auth, group_names):
 
@@ -133,7 +125,6 @@ def format_downtime(minutes):
 # =========================
 # RELATÓRIO
 # =========================
-
 def main():
 
     auth = zabbix_login()
@@ -191,16 +182,6 @@ def main():
                     "Downtime (%)": round(downtime_percent, 4),
                     "Disponibilidade (%)": round(availability, 4)            
                 })
-        
-        #print(f"Total de linhas para {categoria}:", len(rows))
-        #df = pd.DataFrame(rows)
-        #if df.empty:
-        #  print(f"⚠️ Sem dados para categoria: {categoria}")
-        #  continue
-        # 🔥 Ordena pior disponibilidade primeiro
-        #df = df.sort_values(by="Disponibilidade (%)")
-        # 🔥 Nome da aba = categoria
-        #df.to_excel(writer, sheet_name=categoria, index=False)
 
         print(f"Total de linhas para {categoria}:", len(rows))
         df = pd.DataFrame(rows)
@@ -249,7 +230,6 @@ def main():
         # =========================
         # FORMATAÇÃO VISUAL
         # =========================
-
         # 🔹 Negrito na linha de média
         bold_format = workbook.add_format({'bold': True})
         last_row = len(df)  # índice da última linha (excel começa em 1 por causa do header)
@@ -270,7 +250,6 @@ def main():
         'value': 0,
         'format': workbook.add_format({'bg_color': '#FFC7CE'})
         })
-
         # 🔹 DISPONIBILIDADE (%) → verde (>=99)
         worksheet.conditional_format(1, 5, last_row, 5, {
           'type': 'cell',
@@ -278,7 +257,6 @@ def main():
           'value': 99,
           'format': workbook.add_format({'bg_color': '#C6EFCE'})
         })
-
         # 🔹 DISPONIBILIDADE média → amarelo
         worksheet.conditional_format(1, 5, last_row, 5, {
           'type': 'cell',
@@ -287,7 +265,6 @@ def main():
           'maximum': 98.9999,
           'format': workbook.add_format({'bg_color': '#FFEB9C'})
         })
-
         # 🔹 DISPONIBILIDADE baixa → vermelho
         worksheet.conditional_format(1, 5, last_row, 5, {
             'type': 'cell',
@@ -323,7 +300,6 @@ def main():
                 summary_df[col].astype(str).map(len).max(),
             len(col))
             worksheet.set_column(i, i, column_len + 2)
-
         # formatação condicional (disponibilidade)
              # 🔹 DISPONIBILIDADE (%) → verde (>=99)
             worksheet.conditional_format(1, 2, last_row, 2, {
@@ -332,7 +308,6 @@ def main():
             'value': 99,
             'format': workbook.add_format({'bg_color': '#C6EFCE'})
             })
-
             # 🔹 DISPONIBILIDADE média → amarelo
             worksheet.conditional_format(1, 2, last_row, 2, {
             'type': 'cell',
@@ -341,7 +316,6 @@ def main():
             'maximum': 98.9999,
             'format': workbook.add_format({'bg_color': '#FFEB9C'})
             })
-
         # 🔹 DISPONIBILIDADE baixa → vermelho
             worksheet.conditional_format(1, 2, last_row, 2, {
             'type': 'cell',
@@ -352,6 +326,5 @@ def main():
 
     writer.close()
     print("\nRelatório gerado:", OUTPUT_FILE)
-
 if __name__ == "__main__": 
     main()
